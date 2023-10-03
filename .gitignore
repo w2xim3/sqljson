@@ -1,0 +1,18 @@
+# Python
+*.pyc
+__pycache__/
+*.egg-info/
+*.egg
+
+# pytest
+.pytest_cache/
+
+# Packaging
+dist/
+build/
+
+# IDE - PyCharm
+.idea/
+
+# Logs
+logs/
