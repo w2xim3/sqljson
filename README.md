@@ -1,6 +1,12 @@
 # SQLJSON
 A powerful tool that allows users to query JSON data using SQL-like syntax. Effortlessly search, filter, and manipulate your JSON data with familiar SQL queries.
 
+This tool was created solely to simplify searching. While jq works very well, remembering its syntax can become more cumbersome as the query becomes more complex. That's the reason this tool exists. 
+```bash
+cat file.json | jq '.[] | select((.not_before > "2012") or (.id == "1")) | {not_before, common_name}'
+cat file.json | sqljson -q 'select not_before,common_name from this where not_before > "2012" or id ="1"' 
+```
+
 This tool support:
 select, where ,or ,and.
 
