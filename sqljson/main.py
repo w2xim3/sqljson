@@ -21,6 +21,8 @@ def process_conditions(condition_part, df):
             adjusted_conditions.append(conditions[i + 1])
 
     return " ".join(adjusted_conditions)
+
+
 def process_input():
     """Yield each JSON object from stdin."""
     buffer = ""
@@ -126,38 +128,38 @@ def run_query(json_data, query, debug=False):
         return []
 
 
-
-
 def main():
     parser = argparse.ArgumentParser(description='Run SQL-like queries against JSON data.')
-    parser.add_argument('-q', '--query', help='SQL-like query Ex: select ')
+    parser.add_argument('-q', '--query', nargs='?', help='SQL-like query or columns for lazy mode')
     parser.add_argument('-s', '--separator', default=",", help='Output format separator')
     parser.add_argument('-d', '--describe', action='store_true', help='Display all column names')
+    parser.add_argument('-dv', '--describe_value', action='store_true', help='Display all column names with sample values')
     parser.add_argument('-v', '--debug', action='store_true', help='Enable detailed error messages')
-    parser.add_argument('-dv', '--describe_value', action='store_true',help='Display all column names with sample values')
-
     args = parser.parse_args()
 
     for json_data in process_input():
         if args.describe:
             df = pd.json_normalize(json_data)
             print("\n".join(df.columns))
-            continue
+        elif args.describe_value:
+            if isinstance(json_data, list) and len(json_data) > 0:
+                df_sample = pd.json_normalize(json_data[0])
+            elif isinstance(json_data, dict):
+                df_sample = pd.json_normalize(json_data)
+            else:
+                df_sample = pd.DataFrame()  # Empty DataFrame
 
-        if args.describe_value:
-            df = pd.json_normalize(json_data[0] if len(json_data) else {})  # Using the first row
-            max_column_width = max([len(col) for col in df.columns] + [12])  # 12 is the length of "Column Name"
-            sample_values = df.iloc[0] if not df.empty else []
+            max_column_width = max([len(col) for col in df_sample.columns] + [12])  # 12 is the length of "Column Name"
+            sample_values = df_sample.iloc[0] if not df_sample.empty else []
 
             print(f"{'Column Name'.ljust(max_column_width)} | Sample Value")
             print('-' * max_column_width + "-+-" + '-' * 30)  # Adjust 30 based on expected max sample value length
 
-            for column in df.columns:
+            for column in df_sample.columns:
                 value = str(sample_values[column]) if column in sample_values else ''
                 print(f"{column.ljust(max_column_width)} | {value}")
-
-
-        if args.query:
+            break
+        elif args.query:
             results = run_query(json_data, args.query, debug=args.debug)
             for row in results:
                 print(args.separator.join(map(str, row)))
@@ -165,3 +167,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -29,7 +29,7 @@ pip install sqljson
 # Usage example:
 
 ```bash
-usage: sqljson [-h] [-q QUERY] [-s SEPARATOR] [-d]
+usage: sqljson [-h] [-q QUERY] [-s SEPARATOR] [-d] [-v] [-dv]
 
 Run SQL-like queries against JSON data.
 
@@ -40,6 +40,9 @@ options:
   -s SEPARATOR, --separator SEPARATOR
                         Output format separator
   -d, --describe        Display all column names
+  -v, --debug           Enable detailed error messages
+  -dv, --describe_value
+                        Display all column names with sample values
 ```
 
 ## Describe json like a describe table
@@ -54,6 +57,22 @@ entry_timestamp
 not_before
 not_after
 serial_number
+```
+## Describe column and sample of value
+```bash
+curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | sqljson -dv
+Column Name     | Sample Value
+----------------+-------------------------------
+issuer_ca_id    | 101
+issuer_name     | C=US, O=Equifax Secure Inc., CN=Equifax Secure Global eBusiness CA-1
+common_name     | portailgmr.recyc-quebec.gouv.qc.ca
+name_value      | portailgmr.recyc-quebec.gouv.qc.ca
+id              | 2387331592
+entry_timestamp | 2020-01-29T02:52:52.6
+not_before      | 2007-11-02T16:04:00
+not_after       | 2010-11-02T16:04:00
+serial_number   | 071436
+
 ```
 
 ## Select
