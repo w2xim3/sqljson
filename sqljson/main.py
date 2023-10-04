@@ -211,7 +211,12 @@ def main():
                 if args.no_color:
                     print(args.separator.join(map(str, row)))
                 else:
-                    cprint(args.separator.join(colored_row(map(str, row))))
+                    if sys.stdout.isatty():
+                        cprint(args.separator.join(colored_row(map(str, row))))
+                    else:
+                        print(args.separator.join(map(str, row)))
+                        pass
+
 
 
 if __name__ == "__main__":
