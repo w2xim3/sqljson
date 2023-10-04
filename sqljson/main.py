@@ -81,25 +81,34 @@ def run_query(json_data, query, debug=False):
     try:
         df = pd.json_normalize(json_data)
 
-        if "select" not in query.lower() and "from" not in query.lower():
+        # Trim and split columns
+        if "select" not in query.lower() and "from" not in query.lower() and "," in query:
             # Lazy Mode
-            select_cols = query.split(",")
+            parts = query.split(" where ")
+            select_cols = [col.strip() for col in parts[0].split(",")]
+            if len(parts) > 1:
+                condition_part = parts[1].replace("this", "df")
+                condition = process_conditions(condition_part, df)
+                condition = re.sub(r'(?<!=)=(?!=)', '==', condition)
+                result = df.query(condition)[select_cols]
+            else:
+                result = df[select_cols]
         elif "*" in query.split("from")[0].lower():
             select_cols = df.columns.tolist()
+            result = df[select_cols]
         else:
             select_cols = [col.strip() for col in query.split("from")[0].replace("select", "").strip().split(",")]
+            if "where" in query.lower():
+                condition_part = query.split("where")[1].strip().replace("this", "df")
+                condition = process_conditions(condition_part, df)
+                condition = re.sub(r'(?<!=)=(?!=)', '==', condition)
+                result = df.query(condition)[select_cols]
+            else:
+                result = df[select_cols]
 
         for col in select_cols:
             if col not in df.columns:
                 raise KeyError(f"Column '{col}' not found in data.")
-
-        if "where" in query.lower():
-            condition_part = query.split("where")[1].strip().replace("this", "df")
-            condition = process_conditions(condition_part, df)
-            condition = re.sub(r'(?<!=)=(?!=)', '==', condition)
-            result = df.query(condition)[select_cols]
-        else:
-            result = df[select_cols]
 
         flattened_results = [flatten_data(row) for row in result.values.tolist()]
         return flattened_results
@@ -117,12 +126,15 @@ def run_query(json_data, query, debug=False):
         return []
 
 
+
+
 def main():
     parser = argparse.ArgumentParser(description='Run SQL-like queries against JSON data.')
     parser.add_argument('-q', '--query', help='SQL-like query Ex: select ')
     parser.add_argument('-s', '--separator', default=",", help='Output format separator')
     parser.add_argument('-d', '--describe', action='store_true', help='Display all column names')
     parser.add_argument('-v', '--debug', action='store_true', help='Enable detailed error messages')
+    parser.add_argument('-dv', '--describe_value', action='store_true',help='Display all column names with sample values')
 
     args = parser.parse_args()
 
@@ -131,6 +143,19 @@ def main():
             df = pd.json_normalize(json_data)
             print("\n".join(df.columns))
             continue
+
+        if args.describe_value:
+            df = pd.json_normalize(json_data[0] if len(json_data) else {})  # Using the first row
+            max_column_width = max([len(col) for col in df.columns] + [12])  # 12 is the length of "Column Name"
+            sample_values = df.iloc[0] if not df.empty else []
+
+            print(f"{'Column Name'.ljust(max_column_width)} | Sample Value")
+            print('-' * max_column_width + "-+-" + '-' * 30)  # Adjust 30 based on expected max sample value length
+
+            for column in df.columns:
+                value = str(sample_values[column]) if column in sample_values else ''
+                print(f"{column.ljust(max_column_width)} | {value}")
+
 
         if args.query:
             results = run_query(json_data, args.query, debug=args.debug)

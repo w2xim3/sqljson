@@ -2,9 +2,18 @@
 A powerful tool that allows users to query JSON data using SQL-like syntax. Effortlessly search, filter, and manipulate your JSON data with familiar SQL queries.
 
 This tool was created solely to simplify searching. While jq works very well, remembering its syntax can become more cumbersome as the query becomes more complex. That's the reason this tool exists. 
+
+Lazy mode was implemented.
 ```bash
-cat file.json | jq '.[] | select((.not_before > "2012") or (.id == "1")) | {not_before, common_name}'
-cat file.json | sqljson -q 'select not_before,common_name from this where not_before > "2012" or id ="1"' 
+cat file.json | \
+jq '.[] | select((.not_before > "2012") or (.id == "1")) | {not_before, common_name}'
+cat file.json | \
+sqljson -q 'select not_before,common_name from this where not_before > "2012" or id ="1"' 
+# Lazymode remove select and from you only chose what you want ans condition
+cat file.json | \
+sqljson -q 'not_before,common_name where not_before > "2012" or id ="1"'
+cat file.json | \
+sqljson -q not_before,common_name
 ```
 
 This tool support:
@@ -50,9 +59,8 @@ serial_number
 ## Select
 
 ```bash
-
-
-curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | sqljson -q 'select not_before,common_name from this'
+curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
+sqljson -q 'select not_before,common_name from this'
 2007-11-02T16:04:00,portailgmr.recyc-quebec.gouv.qc.ca
 2012-07-26T19:41:37,quewlc02.mri.gouv.qc.ca
 2009-04-07T13:20:59,divulgation.gouv.qc.ca
@@ -62,9 +70,8 @@ curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | sqljson -q 'select not_befor
 ```
 
 ```bash 
-
-
-curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | sqljson -q 'select not_before,common_name from this where not_before > "2012"'
+curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
+sqljson -q 'select not_before,common_name from this where not_before > "2012"'
 2012-07-26T19:41:37,quewlc02.mri.gouv.qc.ca
 2014-05-04T09:33:46,blackberry.clp.gouv.qc.ca
 2012-10-11T15:54:26,www.pag.cldc.cspq.gouv.qc.ca
@@ -111,4 +118,26 @@ cat nested.json
 ```bash
 cat nested.json | sqljson -q 'select address.city from this'
 Anytown
+```
+## Lazy mode
+```bash
+curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
+sqljson -q 'common_name' | \
+httpx -title -silent -j | \
+sqljson -q url,title
+
+http://divulgation.gouv.qc.ca,Not Found
+https://www.agencesss12.gouv.qc.ca,Oops, an error occurred!
+http://www.mri.gouv.qc.ca,Document Moved
+https://courriel.sdbj.gouv.qc.ca,Zimbra Web Client Sign In
+https://www.cse.gouv.qc.ca,Accueil - CSE Conseil supérieur de l'éducation CSE
+```
+
+```bash
+curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
+sqljson -q 'common_name' | \
+httpx -title -silent -j | \
+sqljson -q 'url,title where title = "Zimbra Web Client Sign In"'
+
+https://courriel.sdbj.gouv.qc.ca,Zimbra Web Client Sign In
 ```
