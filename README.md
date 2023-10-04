@@ -4,7 +4,8 @@ A powerful tool that allows users to query JSON data using SQL-like syntax. Effo
 This tool was created solely to simplify searching. While jq works very well, remembering its syntax can become more cumbersome as the query becomes more complex. That's the reason this tool exists. 
 
 Lazy mode was implemented.
-![img_1.png](img_1.png)
+![img_1.png](https://github.com/w2xim3/sqljson/blob/main/img.png)
+
 
 ```bash
 cat file.json | \
