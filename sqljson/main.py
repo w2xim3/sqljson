@@ -81,7 +81,10 @@ def run_query(json_data, query, debug=False):
     try:
         df = pd.json_normalize(json_data)
 
-        if "*" in query.split("from")[0].lower():
+        if "select" not in query.lower() and "from" not in query.lower():
+            # Lazy Mode
+            select_cols = query.split(",")
+        elif "*" in query.split("from")[0].lower():
             select_cols = df.columns.tolist()
         else:
             select_cols = [col.strip() for col in query.split("from")[0].replace("select", "").strip().split(",")]
@@ -89,9 +92,6 @@ def run_query(json_data, query, debug=False):
         for col in select_cols:
             if col not in df.columns:
                 raise KeyError(f"Column '{col}' not found in data.")
-
-        if not query.lower().startswith("select"):
-            raise ValueError("Only SELECT queries are supported.")
 
         if "where" in query.lower():
             condition_part = query.split("where")[1].strip().replace("this", "df")
@@ -115,6 +115,7 @@ def run_query(json_data, query, debug=False):
                 print(f"Unexpected Error: {e}")
                 sys.exit(1)
         return []
+
 
 def main():
     parser = argparse.ArgumentParser(description='Run SQL-like queries against JSON data.')
