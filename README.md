@@ -141,6 +141,7 @@ cat nested.json
 
 ```bash
 cat nested.json | sqljson 'select address.city from this'
+cat nested.json | sqljson address.city # Lazy mode
 Anytown
 ```
 ## Lazy mode
