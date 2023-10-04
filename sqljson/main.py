@@ -6,7 +6,7 @@ import sys
 import argparse
 from termcolor import colored, cprint
 
-VERSION = "1.0.0"
+VERSION = "0.1.7"
 def gradient_color(value, total):
     """ Create a rainbow gradient transitioning from red to blue """
     segments = [

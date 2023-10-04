@@ -4,6 +4,8 @@ A powerful tool that allows users to query JSON data using SQL-like syntax. Effo
 This tool was created solely to simplify searching. While jq works very well, remembering its syntax can become more cumbersome as the query becomes more complex. That's the reason this tool exists. 
 
 Lazy mode was implemented.
+![img_1.png](img_1.png)
+
 ```bash
 cat file.json | \
 jq '.[] | select((.not_before > "2012") or (.id == "1")) | {not_before, common_name}'
@@ -32,7 +34,7 @@ pip install sqljson
 # Usage example:
 
 ```bash
-usage: main.py [-h] [-s SEPARATOR] [-d] [-dv] [-v] query
+usage: sqljson [-h] [-s SEPARATOR] [-d] [-dv] [-v] [-nc] [-V] [query]
 
 Run SQL-like queries against JSON data.
 
@@ -47,7 +49,8 @@ options:
   -dv, --describe_value
                         Display all column names with sample values
   -v, --debug           Enable detailed error messages
-
+  -nc, --no-color       Disable colored output
+  -V, --version         Show the version number and exit.
 ```
 
 ## Describe json like a describe table
