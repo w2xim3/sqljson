@@ -50,6 +50,8 @@ serial_number
 ## Select
 
 ```bash
+
+
 curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | sqljson -q 'select not_before,common_name from this'
 2007-11-02T16:04:00,portailgmr.recyc-quebec.gouv.qc.ca
 2012-07-26T19:41:37,quewlc02.mri.gouv.qc.ca
@@ -60,6 +62,8 @@ curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | sqljson -q 'select not_befor
 ```
 
 ```bash 
+
+
 curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | sqljson -q 'select not_before,common_name from this where not_before > "2012"'
 2012-07-26T19:41:37,quewlc02.mri.gouv.qc.ca
 2014-05-04T09:33:46,blackberry.clp.gouv.qc.ca
