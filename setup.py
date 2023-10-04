@@ -5,7 +5,8 @@ setup(
     version="0.1.6",
     packages=find_packages(),
     install_requires=[
-        'pandas'
+        'pandas',
+        'termcolor'
     ],
     entry_points={
         'console_scripts': [

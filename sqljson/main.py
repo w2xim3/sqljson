@@ -4,8 +4,48 @@ import re
 import pandas as pd
 import sys
 import argparse
+from termcolor import colored, cprint
+
+VERSION = "1.0.0"
+def gradient_color(value, total):
+    """ Create a rainbow gradient transitioning from red to blue """
+    segments = [
+        (255, 0, 0),    # Red
+        (255, 127, 0),  # Orange
+        (255, 255, 0),  # Yellow
+        (127, 255, 0),  # Chartreuse
+        (0, 255, 0),    # Green
+        (0, 255, 127),  # Spring Green
+        (0, 255, 255),  # Cyan
+        (0, 127, 255),  # Azure
+        (0, 0, 255)     # Blue
+    ]
+
+    segment_length = total / (len(segments) - 1)
+
+    start_segment = int(value // segment_length)
+    t = (value % segment_length) / segment_length  # Normalized value within the segment
+
+    if start_segment == len(segments) - 1:
+        return segments[-1]
+
+    # Interpolate between two segment colors
+    r = int(segments[start_segment][0] + t * (segments[start_segment + 1][0] - segments[start_segment][0]))
+    g = int(segments[start_segment][1] + t * (segments[start_segment + 1][1] - segments[start_segment][1]))
+    b = int(segments[start_segment][2] + t * (segments[start_segment + 1][2] - segments[start_segment][2]))
+
+    return r, g, b
 
 
+def colored_row(row):
+    row = list(row)
+    colored_items = []
+    total_items = len(row)
+    for idx, item in enumerate(row):
+        r, g, b = gradient_color(idx, total_items)
+        colored_item = f"\033[38;2;{r};{g};{b}m{item}"
+        colored_items.append(colored_item)
+    return colored_items
 def process_conditions(condition_part, df):
     conditions = re.split(r'\s+(and|or)\s+', condition_part)
     adjusted_conditions = []
@@ -135,6 +175,8 @@ def main():
     parser.add_argument('-d', '--describe', action='store_true', help='Display all column names')
     parser.add_argument('-dv', '--describe_value', action='store_true',help='Display all column names with sample values')
     parser.add_argument('-v', '--debug', action='store_true', help='Enable detailed error messages')
+    parser.add_argument('-nc', '--no-color', action='store_true', help='Disable colored output')
+    parser.add_argument('-V', '--version', action='version', version=f"%(prog)s {VERSION}",help="Show the version number and exit.")
 
     args = parser.parse_args()
     if not args.query and not any([args.describe, args.describe_value]):
@@ -155,17 +197,21 @@ def main():
             max_column_width = max([len(col) for col in df_sample.columns] + [12])  # 12 is the length of "Column Name"
             sample_values = df_sample.iloc[0] if not df_sample.empty else []
 
-            print(f"{'Column Name'.ljust(max_column_width)} | Sample Value")
-            print('-' * max_column_width + "-+-" + '-' * 30)  # Adjust 30 based on expected max sample value length
+            print(colored(f"{'Column Name'.ljust(max_column_width)} | Sample Value", 'cyan'))
+            print(colored('-' * max_column_width + "-+-" + '-' * 30,
+                          'cyan'))  # Adjust 30 based on expected max sample value length
 
             for column in df_sample.columns:
                 value = str(sample_values[column]) if column in sample_values else ''
-                print(f"{column.ljust(max_column_width)} | {value}")
+                print(colored(f"{column.ljust(max_column_width)} | {value}", 'green'))
             break
         elif args.query:
             results = run_query(json_data, args.query, debug=args.debug)
             for row in results:
-                print(args.separator.join(map(str, row)))
+                if args.no_color:
+                    print(args.separator.join(map(str, row)))
+                else:
+                    cprint(args.separator.join(colored_row(map(str, row))))
 
 
 if __name__ == "__main__":
