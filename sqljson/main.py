@@ -130,10 +130,10 @@ def run_query(json_data, query, debug=False):
 
 def main():
     parser = argparse.ArgumentParser(description='Run SQL-like queries against JSON data.')
-    parser.add_argument('-q', '--query', nargs='?', help='SQL-like query or columns for lazy mode')
+    parser.add_argument('query', help='SQL-like query or columns for lazy mode')
     parser.add_argument('-s', '--separator', default=",", help='Output format separator')
     parser.add_argument('-d', '--describe', action='store_true', help='Display all column names')
-    parser.add_argument('-dv', '--describe_value', action='store_true', help='Display all column names with sample values')
+    parser.add_argument('-dv', '--describe_value', action='store_true',help='Display all column names with sample values')
     parser.add_argument('-v', '--debug', action='store_true', help='Enable detailed error messages')
     args = parser.parse_args()
 

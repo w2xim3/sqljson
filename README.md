@@ -7,13 +7,16 @@ Lazy mode was implemented.
 ```bash
 cat file.json | \
 jq '.[] | select((.not_before > "2012") or (.id == "1")) | {not_before, common_name}'
+
 cat file.json | \
-sqljson -q 'select not_before,common_name from this where not_before > "2012" or id ="1"' 
+sqljson 'select not_before,common_name from this where not_before > "2012" or id ="1"' 
+
 # Lazymode remove select and from you only chose what you want ans condition
+
 cat file.json | \
-sqljson -q 'not_before,common_name where not_before > "2012" or id ="1"'
-cat file.json | \
-sqljson -q not_before,common_name
+sqljson 'not_before,common_name where not_before > "2012" or id ="1"'
+
+cat file.json | sqljson not_before,common_name
 ```
 
 This tool support:
@@ -29,20 +32,22 @@ pip install sqljson
 # Usage example:
 
 ```bash
-usage: sqljson [-h] [-q QUERY] [-s SEPARATOR] [-d] [-v] [-dv]
+usage: main.py [-h] [-s SEPARATOR] [-d] [-dv] [-v] query
 
 Run SQL-like queries against JSON data.
 
+positional arguments:
+  query                 SQL-like query or columns for lazy mode
+
 options:
   -h, --help            show this help message and exit
-  -q QUERY, --query QUERY
-                        SQL-like query Ex: select
   -s SEPARATOR, --separator SEPARATOR
                         Output format separator
   -d, --describe        Display all column names
-  -v, --debug           Enable detailed error messages
   -dv, --describe_value
                         Display all column names with sample values
+  -v, --debug           Enable detailed error messages
+
 ```
 
 ## Describe json like a describe table
@@ -79,7 +84,7 @@ serial_number   | 071436
 
 ```bash
 curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
-sqljson -q 'select not_before,common_name from this'
+sqljson 'select not_before,common_name from this'
 2007-11-02T16:04:00,portailgmr.recyc-quebec.gouv.qc.ca
 2012-07-26T19:41:37,quewlc02.mri.gouv.qc.ca
 2009-04-07T13:20:59,divulgation.gouv.qc.ca
@@ -90,7 +95,7 @@ sqljson -q 'select not_before,common_name from this'
 
 ```bash 
 curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
-sqljson -q 'select not_before,common_name from this where not_before > "2012"'
+sqljson 'select not_before,common_name from this where not_before > "2012"'
 2012-07-26T19:41:37,quewlc02.mri.gouv.qc.ca
 2014-05-04T09:33:46,blackberry.clp.gouv.qc.ca
 2012-10-11T15:54:26,www.pag.cldc.cspq.gouv.qc.ca
@@ -135,15 +140,15 @@ cat nested.json
 ```
 
 ```bash
-cat nested.json | sqljson -q 'select address.city from this'
+cat nested.json | sqljson 'select address.city from this'
 Anytown
 ```
 ## Lazy mode
 ```bash
 curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
-sqljson -q 'common_name' | \
+sqljson common_name | \
 httpx -title -silent -j | \
-sqljson -q url,title
+sqljson url,title
 
 http://divulgation.gouv.qc.ca,Not Found
 https://www.agencesss12.gouv.qc.ca,Oops, an error occurred!
@@ -154,9 +159,9 @@ https://www.cse.gouv.qc.ca,Accueil - CSE Conseil supérieur de l'éducation CSE
 
 ```bash
 curl -s 'https://crt.sh?o=gouv.qc.ca&output=json' | \
-sqljson -q 'common_name' | \
+sqljson common_name | \
 httpx -title -silent -j | \
-sqljson -q 'url,title where title = "Zimbra Web Client Sign In"'
+sqljson 'url,title where title = "Zimbra Web Client Sign In"'
 
 https://courriel.sdbj.gouv.qc.ca,Zimbra Web Client Sign In
 ```
